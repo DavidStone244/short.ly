@@ -28,25 +28,12 @@ export default function HomePage() {
         <Particles />
         <CursorSpotlight />
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-20 sm:pt-28">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto flex max-w-fit items-center gap-2 rounded-full border border-border/70 bg-card/40 px-3 py-1 text-xs backdrop-blur"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            <span className="text-muted-foreground">v1.0 · Free, open source, self-hostable</span>
-          </motion.div>
-
+        <div className="relative mx-auto max-w-6xl px-5 pb-32 pt-24 sm:pt-32">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
-            className="mt-6 text-balance text-center text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
+            className="text-balance text-center text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
           >
             Shorten <span className="text-gradient neon-text">smarter</span>.<br />
             Share <span className="text-gradient neon-text">faster</span>.
@@ -62,27 +49,25 @@ export default function HomePage() {
             password-gated links, and auto-expiry. Built for speed.
           </motion.p>
 
-          {/* Live demo */}
+          {/* Hero shorten form — the star of the show */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mx-auto mt-10 max-w-2xl"
+            initial={{ opacity: 0, y: 28, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
+            className="relative mx-auto mt-14 max-w-3xl"
           >
-            <ShortenForm />
-          </motion.div>
-
-          {/* Trust strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="mx-auto mt-14 flex max-w-3xl flex-wrap items-center justify-center gap-x-10 gap-y-3 text-xs text-muted-foreground"
-          >
-            <Stat label="P95 latency" value="<40ms" />
-            <Stat label="Uptime" value="99.99%" />
-            <Stat label="Open source" value="MIT" />
-            <Stat label="Self-host" value="Docker / bare-metal" />
+            {/* Outer glow halo */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] opacity-80 blur-2xl"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(59,130,255,0.35), transparent 70%), radial-gradient(closest-side at 80% 30%, rgba(155,92,255,0.32), transparent 70%), radial-gradient(closest-side at 20% 80%, rgba(0,229,255,0.25), transparent 70%)",
+              }}
+            />
+            <div className="border-gradient rounded-3xl bg-card/60 p-2 backdrop-blur-2xl shadow-glow">
+              <ShortenForm size="hero" />
+            </div>
           </motion.div>
         </div>
 
@@ -211,15 +196,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col items-center gap-0.5">
-      <span className="font-mono text-sm text-foreground">{value}</span>
-      <span className="text-[10px] uppercase tracking-wider">{label}</span>
     </div>
   );
 }

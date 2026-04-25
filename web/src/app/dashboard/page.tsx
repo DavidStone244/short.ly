@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -23,7 +23,6 @@ import { useAuth } from "@/lib/auth";
 import { api, ApiError, type LinkOut, type LinkStats } from "@/lib/api";
 import { CopyButton } from "@/components/CopyButton";
 import { ShortenForm } from "@/components/ShortenForm";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { Sparkline } from "@/components/Sparkline";
 import { toast } from "sonner";
 
@@ -35,7 +34,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [showNew, setShowNew] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
 
   // Auth + initial load
   useEffect(() => {
@@ -50,7 +48,6 @@ export default function DashboardPage() {
         const list = await api.listLinks(token);
         if (cancelled) return;
         setLinks(list);
-        // Fetch stats in parallel for the first ~20 links so sparklines populate fast
         const subset = list.slice(0, 20);
         const results = await Promise.all(
           subset.map((l) =>
@@ -77,29 +74,6 @@ export default function DashboardPage() {
       cancelled = true;
     };
   }, [ready, token, router]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
-      const isTyping = tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable;
-      if (isTyping) {
-        if (e.key === "Escape") (e.target as HTMLElement).blur();
-        return;
-      }
-      if (e.key === "/" || (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey))) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      } else if (e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        setShowNew(true);
-      } else if (e.key === "Escape") {
-        setShowNew(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const handleDelete = useCallback(
     async (code: string) => {
@@ -137,111 +111,98 @@ export default function DashboardPage() {
   }, [links, stats]);
 
   return (
-    <div className="flex min-h-screen">
-      <DashboardSidebar onNew={() => setShowNew(true)} />
+    <div className="relative min-h-screen">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse at top right, rgba(59,130,255,0.10), transparent 50%), radial-gradient(ellipse at bottom left, rgba(155,92,255,0.08), transparent 50%)",
+        }}
+      />
 
-      <div className="relative flex-1">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(ellipse at top right, rgba(59,130,255,0.08), transparent 50%), radial-gradient(ellipse at bottom left, rgba(155,92,255,0.06), transparent 50%)",
-          }}
-        />
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Overview</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Real-time view of your links and their clicks.
+          </p>
+        </motion.div>
 
-        {/* Topbar */}
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border/60 bg-background/70 px-6 py-3 backdrop-blur-xl">
-          <div className="flex flex-1 items-center gap-2 rounded-xl border border-border/70 bg-card/40 px-3 py-1.5 backdrop-blur">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input
-              ref={searchRef}
-              type="search"
-              placeholder="Search links by code, URL or alias…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-8 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
-            />
-            <kbd className="hidden rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
-              /
-            </kbd>
-          </div>
-          <button
-            onClick={() => setShowNew(true)}
-            className="hidden items-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] px-4 py-2 text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow sm:inline-flex"
-          >
-            <Plus className="h-4 w-4" />
-            New link
-            <kbd className="rounded bg-black/20 px-1.5 py-0.5 font-mono text-[10px]">N</kbd>
-          </button>
-        </header>
+        {/* Stat cards */}
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <StatCard
+            label="Total links"
+            value={totals.links}
+            icon={<Link2 className="h-4 w-4" />}
+            tone="blue"
+          />
+          <StatCard
+            label="Total clicks"
+            value={totals.clicks}
+            icon={<MousePointerClick className="h-4 w-4" />}
+            tone="purple"
+          />
+          <StatCard
+            label="Unique visitors"
+            value={totals.unique}
+            icon={<Globe className="h-4 w-4" />}
+            tone="cyan"
+          />
+        </div>
 
-        <main className="mx-auto max-w-6xl px-6 py-8">
-          <div className="mb-2">
-            <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
-            <p className="text-sm text-muted-foreground">
-              Real-time view of your links and their clicks.
-            </p>
-          </div>
-
-          {/* Stat cards */}
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <StatCard
-              label="Total links"
-              value={totals.links}
-              icon={<Link2 className="h-4 w-4" />}
-              tone="blue"
-            />
-            <StatCard
-              label="Total clicks"
-              value={totals.clicks}
-              icon={<MousePointerClick className="h-4 w-4" />}
-              tone="purple"
-            />
-            <StatCard
-              label="Unique visitors"
-              value={totals.unique}
-              icon={<Globe className="h-4 w-4" />}
-              tone="cyan"
-            />
-          </div>
-
-          {/* Links list */}
-          <div className="mt-10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold tracking-tight">Your links</h2>
-              {links && (
-                <span className="rounded-full border border-border/70 bg-card/40 px-2 py-0.5 text-xs text-muted-foreground">
-                  {filtered.length}
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              <kbd className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px]">N</kbd>{" "}
-              new ·{" "}
-              <kbd className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px]">/</kbd>{" "}
-              search
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {loading || !links ? (
-              [...Array(3)].map((_, i) => <SkeletonRow key={i} />)
-            ) : filtered.length === 0 ? (
-              <EmptyState query={query} onCreate={() => setShowNew(true)} />
-            ) : (
-              filtered.map((link) => (
-                <LinkRow
-                  key={link.code}
-                  link={link}
-                  stats={stats[link.code]}
-                  onDelete={() => handleDelete(link.code)}
-                />
-              ))
+        {/* Links list — search + new-link sit alongside the heading */}
+        <div className="mt-12 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-semibold tracking-tight">Your links</h2>
+            {links && (
+              <span className="rounded-full border border-border/70 bg-card/40 px-2 py-0.5 text-xs text-muted-foreground">
+                {filtered.length}
+              </span>
             )}
           </div>
-        </main>
-      </div>
+          <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-2 rounded-xl border border-border/70 bg-card/50 px-3 py-1.5 backdrop-blur sm:w-72">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder="Search links…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="h-8 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
+              />
+            </div>
+            <button
+              onClick={() => setShowNew(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] px-4 py-2 text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow"
+            >
+              <Plus className="h-4 w-4" />
+              New link
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {loading || !links ? (
+            [...Array(3)].map((_, i) => <SkeletonRow key={i} />)
+          ) : filtered.length === 0 ? (
+            <EmptyState query={query} onCreate={() => setShowNew(true)} />
+          ) : (
+            filtered.map((link) => (
+              <LinkRow
+                key={link.code}
+                link={link}
+                stats={stats[link.code]}
+                onDelete={() => handleDelete(link.code)}
+              />
+            ))
+          )}
+        </div>
+      </main>
 
       {/* New link modal */}
       <AnimatePresence>
@@ -375,7 +336,6 @@ function LinkRow({
           <div className="truncate text-xs text-muted-foreground">→ {link.target_url}</div>
         </div>
 
-        {/* Sparkline + stats */}
         <div className="flex shrink-0 items-center gap-4">
           <div className="text-right">
             <div className="font-mono text-base">{stats ? stats.total_clicks : "—"}</div>

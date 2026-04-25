@@ -21,7 +21,6 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { api, ApiError, type LinkOut, type LinkStats } from "@/lib/api";
 import { CopyButton } from "@/components/CopyButton";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { toast } from "sonner";
 import {
   ResponsiveContainer,
@@ -103,20 +102,17 @@ export default function LinkDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <DashboardSidebar />
+    <div className="relative min-h-screen">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse at top right, rgba(59,130,255,0.10), transparent 50%), radial-gradient(ellipse at bottom left, rgba(155,92,255,0.08), transparent 50%)",
+        }}
+      />
 
-      <div className="relative flex-1">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(ellipse at top right, rgba(59,130,255,0.08), transparent 50%), radial-gradient(ellipse at bottom left, rgba(155,92,255,0.06), transparent 50%)",
-          }}
-        />
-
-        <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-6 py-8">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -262,7 +258,10 @@ export default function LinkDetailPage({ params }: PageProps) {
                               borderRadius: 12,
                               fontSize: 12,
                               backdropFilter: "blur(12px)",
+                              color: "#f5f7ff",
                             }}
+                            labelStyle={{ color: "#f5f7ff", fontWeight: 600 }}
+                            itemStyle={{ color: "#dbe4ff" }}
                             cursor={{ stroke: "rgba(110,168,255,0.5)", strokeWidth: 1 }}
                           />
                           <Area
@@ -324,37 +323,29 @@ export default function LinkDetailPage({ params }: PageProps) {
                   data={stats.top_os.filter(([k]) => k).map(([k, v]) => ({ name: k ?? "?", value: v }))}
                 />
               </div>
-
-              {/* Geo placeholder */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="mt-6 overflow-hidden rounded-2xl border border-dashed border-border/70 bg-card/30 p-8 text-center"
-              >
-                <Globe className="mx-auto h-6 w-6 text-muted-foreground" />
-                <h3 className="mt-3 text-sm font-semibold tracking-tight">Geo analytics</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  World map + country breakdown coming in the next release.
-                </p>
-              </motion.div>
             </>
           )}
-        </main>
-      </div>
+      </main>
     </div>
   );
 }
 
 function timeAgo(iso: string): string {
+  // The backend always sends UTC. If the string lacks a timezone marker
+  // (legacy data from naive SQLite columns), append 'Z' so the browser
+  // doesn't reinterpret it as local time.
+  const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(iso);
+  const normalized = hasTz ? iso : iso + "Z";
   const now = Date.now();
-  const t = new Date(iso).getTime();
-  const diff = (now - t) / 1000;
-  if (diff < 60) return "just now";
+  const t = new Date(normalized).getTime();
+  if (Number.isNaN(t)) return "—";
+  const diff = Math.max(0, (now - t) / 1000);
+  if (diff < 30) return "just now";
+  if (diff < 60) return `${Math.floor(diff)}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 86400 * 30) return `${Math.floor(diff / 86400)}d ago`;
-  return new Date(iso).toLocaleDateString();
+  return new Date(normalized).toLocaleDateString();
 }
 
 function Chip({
@@ -444,7 +435,10 @@ function BarCard({
                   border: "1px solid rgba(255,255,255,0.1)",
                   borderRadius: 12,
                   fontSize: 12,
+                  color: "#f5f7ff",
                 }}
+                labelStyle={{ color: "#f5f7ff", fontWeight: 600 }}
+                itemStyle={{ color: "#dbe4ff" }}
                 cursor={{ fill: "rgba(110,168,255,0.08)" }}
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={700}>

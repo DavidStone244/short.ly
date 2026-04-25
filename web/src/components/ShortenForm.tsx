@@ -10,8 +10,13 @@ import { api, ApiError, type LinkOut } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
-export function ShortenForm() {
+interface ShortenFormProps {
+  size?: "default" | "hero";
+}
+
+export function ShortenForm({ size = "default" }: ShortenFormProps = {}) {
   const { token } = useAuth();
+  const isHero = size === "hero";
   const [targetUrl, setTargetUrl] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [customAlias, setCustomAlias] = useState("");
@@ -65,9 +70,19 @@ export function ShortenForm() {
             aria-hidden
             className="pointer-events-none absolute -inset-[1px] rounded-2xl bg-brand-gradient bg-[length:300%_300%] opacity-70 blur-[2px] animate-gradient-shift"
           />
-          <div className="relative flex items-center gap-2 rounded-2xl border border-border/70 bg-card/80 p-1.5 backdrop-blur-xl">
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-secondary/40">
-              <LinkIcon className="h-5 w-5 text-muted-foreground" />
+          <div
+            className={`relative flex items-center gap-2 rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl ${
+              isHero ? "p-2 sm:p-2.5" : "p-1.5"
+            }`}
+          >
+            <div
+              className={`grid place-items-center rounded-xl bg-secondary/40 ${
+                isHero ? "h-14 w-14 sm:h-16 sm:w-16" : "h-12 w-12"
+              }`}
+            >
+              <LinkIcon
+                className={isHero ? "h-6 w-6 text-muted-foreground sm:h-7 sm:w-7" : "h-5 w-5 text-muted-foreground"}
+              />
             </div>
             <input
               type="url"
@@ -75,20 +90,32 @@ export function ShortenForm() {
               placeholder="https://your-very-long-url.example.com/path"
               value={targetUrl}
               onChange={(e) => setTargetUrl(e.target.value)}
-              className="h-12 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground/60"
+              className={`flex-1 bg-transparent outline-none placeholder:text-muted-foreground/60 ${
+                isHero ? "h-14 text-base sm:h-16 sm:text-lg" : "h-12 text-base"
+              }`}
             />
             <button
               type="submit"
               disabled={submitting}
-              className="group inline-flex h-12 items-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] px-5 text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60"
+              className={`group inline-flex items-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60 ${
+                isHero ? "h-14 px-5 text-sm sm:h-16 sm:px-7 sm:text-base" : "h-12 px-5 text-sm"
+              }`}
             >
               {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className={isHero ? "h-5 w-5 animate-spin" : "h-4 w-4 animate-spin"} />
               ) : (
-                <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+                <Sparkles
+                  className={`transition-transform group-hover:rotate-12 ${
+                    isHero ? "h-5 w-5" : "h-4 w-4"
+                  }`}
+                />
               )}
               <span>{submitting ? "Shortening" : "Shorten"}</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight
+                className={`transition-transform group-hover:translate-x-0.5 ${
+                  isHero ? "h-5 w-5" : "h-4 w-4"
+                }`}
+              />
             </button>
           </div>
         </motion.div>
@@ -122,32 +149,32 @@ export function ShortenForm() {
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="grid gap-4 rounded-2xl border border-border/70 bg-card/40 p-5 backdrop-blur sm:grid-cols-3">
+              <div className="grid items-end gap-4 rounded-2xl border border-border/70 bg-card/40 p-5 backdrop-blur sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="alias">Custom alias</Label>
+                  <Label htmlFor="alias" className="flex h-4 items-center gap-1">
+                    Custom alias
+                  </Label>
                   <Input
                     id="alias"
                     placeholder="my-link"
                     value={customAlias}
                     onChange={(e) => setCustomAlias(e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">e.g. short.ly/my-link</p>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="flex items-center gap-1">
+                  <Label htmlFor="password" className="flex h-4 items-center gap-1">
                     <Lock className="h-3 w-3" /> Password
                   </Label>
                   <Input
                     id="password"
                     type="text"
-                    placeholder="optional"
+                    placeholder=""
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">Visitors must enter it</p>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="expires" className="flex items-center gap-1">
+                  <Label htmlFor="expires" className="flex h-4 items-center gap-1">
                     <Calendar className="h-3 w-3" /> Expires at
                   </Label>
                   <Input
@@ -156,7 +183,6 @@ export function ShortenForm() {
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">Auto-expiry (optional)</p>
                 </div>
               </div>
             </motion.div>

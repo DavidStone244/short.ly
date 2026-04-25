@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import io
+from datetime import UTC, datetime
 from typing import Annotated
 
 import qrcode
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy import desc, select
+from sqlalchemy import delete, desc, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shortly.config import get_settings
 from shortly.deps import (
@@ -76,6 +78,22 @@ async def shorten(
     return _to_out(link)
 
 
+async def _purge_expired_links(db: AsyncSession, owner_id: int) -> None:
+    """Hard-delete any of this owner's links whose ``expires_at`` is in the past.
+
+    Called on dashboard reads so stale entries drop off automatically without
+    requiring the user to clean up by hand. Cascades remove their click rows.
+    """
+    now = datetime.now(UTC)
+    stmt = delete(Link).where(
+        Link.owner_id == owner_id,
+        Link.expires_at.is_not(None),
+        Link.expires_at <= now,
+    )
+    await db.execute(stmt)
+    await db.commit()
+
+
 @router.get("", response_model=list[LinkOut])
 async def list_my_links(
     db: DBSession,
@@ -83,6 +101,7 @@ async def list_my_links(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[LinkOut]:
+    await _purge_expired_links(db, user.id)
     stmt = (
         select(Link)
         .where(Link.owner_id == user.id)

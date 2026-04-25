@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { AuthShell, SocialButtons, Divider } from "@/components/AuthShell";
+import { AuthShell } from "@/components/AuthShell";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -48,8 +48,6 @@ export default function LoginPage() {
         </>
       }
     >
-      <SocialButtons />
-      <Divider>or continue with email</Divider>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>

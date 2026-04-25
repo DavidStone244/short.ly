@@ -56,9 +56,16 @@ async def compute_stats(db: AsyncSession, link: Link) -> LinkStats:
 
     last_q = select(func.max(Click.occurred_at)).where(Click.link_id == link.id)
     last_clicked_at_raw = (await db.execute(last_q)).scalar()
-    last_clicked_at: datetime | None = (
-        last_clicked_at_raw if isinstance(last_clicked_at_raw, datetime) else None
-    )
+    last_clicked_at: datetime | None = None
+    if isinstance(last_clicked_at_raw, datetime):
+        # SQLite stores naive datetimes; func.now() writes UTC. Force a UTC tzinfo
+        # so the JSON serializer emits an offset (e.g. "...+00:00") and the
+        # browser doesn't reinterpret as local time.
+        last_clicked_at = (
+            last_clicked_at_raw.replace(tzinfo=UTC)
+            if last_clicked_at_raw.tzinfo is None
+            else last_clicked_at_raw.astimezone(UTC)
+        )
 
     top_referrers = await _top_n(db, link.id, Click.referrer)
     top_browsers = await _top_n(db, link.id, Click.browser_family)

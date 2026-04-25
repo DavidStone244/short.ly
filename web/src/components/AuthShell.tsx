@@ -16,12 +16,12 @@ interface AuthShellProps {
 
 export function AuthShell({ title, subtitle, footer, children }: AuthShellProps) {
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden">
+    <div className="relative -mt-[5rem] min-h-screen overflow-hidden pt-[5rem]">
       <MeshBackground />
       <div aria-hidden className="absolute inset-0 grid-bg opacity-40" />
       <CursorSpotlight color="rgba(155, 92, 255, 0.18)" size={620} />
 
-      <div className="relative mx-auto flex min-h-[calc(100vh-6rem)] max-w-md items-center justify-center px-5 py-12">
+      <div className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center px-5 py-12">
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

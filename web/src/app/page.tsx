@@ -17,6 +17,7 @@ import { ShortenForm } from "@/components/ShortenForm";
 import { Particles } from "@/components/Particles";
 import { CursorSpotlight } from "@/components/CursorSpotlight";
 import { MeshBackground } from "@/components/MeshBackground";
+import { TypewriterHeadline } from "@/components/TypewriterHeadline";
 
 export default function HomePage() {
   return (
@@ -29,15 +30,13 @@ export default function HomePage() {
         <CursorSpotlight />
 
         <div className="relative mx-auto max-w-6xl px-5 pb-32 pt-24 sm:pt-32">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
+          <TypewriterHeadline
+            lines={[
+              { prefix: "Shorten ", highlight: "smarter", suffix: "." },
+              { prefix: "Share ", highlight: "faster", suffix: "." },
+            ]}
             className="text-balance text-center text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
-          >
-            Shorten <span className="text-gradient neon-text">smarter</span>.<br />
-            Share <span className="text-gradient neon-text">faster</span>.
-          </motion.h1>
+          />
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -65,7 +64,7 @@ export default function HomePage() {
                   "radial-gradient(closest-side, rgba(59,130,255,0.35), transparent 70%), radial-gradient(closest-side at 80% 30%, rgba(155,92,255,0.32), transparent 70%), radial-gradient(closest-side at 20% 80%, rgba(0,229,255,0.25), transparent 70%)",
               }}
             />
-            <div className="border-gradient rounded-3xl bg-card/60 p-2 backdrop-blur-2xl shadow-glow">
+            <div className="border-gradient rounded-[2rem] bg-card/60 p-3 backdrop-blur-2xl shadow-glow sm:rounded-[2.25rem]">
               <ShortenForm size="hero" />
             </div>
           </motion.div>

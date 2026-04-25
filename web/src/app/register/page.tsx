@@ -33,7 +33,7 @@ function passwordStrength(p: string): StrengthInfo {
     return {
       tier: "excellent",
       label: "Excellent",
-      hint: "Looks great. Strong enough for sensitive accounts.",
+      hint: "",
       fill: 3,
     };
   }
@@ -41,7 +41,7 @@ function passwordStrength(p: string): StrengthInfo {
     return {
       tier: "good",
       label: "Good",
-      hint: "Acceptable. Add a special character + 16 chars to reach Excellent.",
+      hint: "",
       fill: 2,
     };
   }

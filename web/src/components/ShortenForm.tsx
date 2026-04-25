@@ -68,15 +68,17 @@ export function ShortenForm({ size = "default" }: ShortenFormProps = {}) {
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-[1px] rounded-2xl bg-brand-gradient bg-[length:300%_300%] opacity-70 blur-[2px] animate-gradient-shift"
+            className={`pointer-events-none absolute -inset-[1px] bg-brand-gradient bg-[length:300%_300%] opacity-70 blur-[2px] animate-gradient-shift ${
+              isHero ? "rounded-[1.75rem]" : "rounded-2xl"
+            }`}
           />
           <div
-            className={`relative flex items-center gap-2 rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl ${
-              isHero ? "p-2 sm:p-2.5" : "p-1.5"
+            className={`relative flex items-center gap-2 border border-border/70 bg-card/80 backdrop-blur-xl ${
+              isHero ? "rounded-[1.75rem] p-2 sm:p-2.5" : "rounded-2xl p-1.5"
             }`}
           >
             <div
-              className={`grid place-items-center rounded-xl bg-secondary/40 ${
+              className={`grid place-items-center rounded-2xl bg-secondary/40 ${
                 isHero ? "h-14 w-14 sm:h-16 sm:w-16" : "h-12 w-12"
               }`}
             >
@@ -97,8 +99,10 @@ export function ShortenForm({ size = "default" }: ShortenFormProps = {}) {
             <button
               type="submit"
               disabled={submitting}
-              className={`group inline-flex items-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60 ${
-                isHero ? "h-14 px-5 text-sm sm:h-16 sm:px-7 sm:text-base" : "h-12 px-5 text-sm"
+              className={`group inline-flex items-center gap-2 bg-brand-gradient bg-[length:200%_200%] font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60 ${
+                isHero
+                  ? "h-14 rounded-2xl px-5 text-sm sm:h-16 sm:rounded-[1.5rem] sm:px-7 sm:text-base"
+                  : "h-12 rounded-xl px-5 text-sm"
               }`}
             >
               {submitting ? (

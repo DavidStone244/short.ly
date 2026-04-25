@@ -83,14 +83,19 @@ async def _purge_expired_links(db: AsyncSession, owner_id: int) -> None:
 
     Called on dashboard reads so stale entries drop off automatically without
     requiring the user to clean up by hand. Cascades remove their click rows.
+
+    ``synchronize_session=False`` skips SQLAlchemy's in-memory predicate
+    evaluation, which would otherwise try to compare a tz-aware ``now`` against
+    SQLite's naive timestamps and raise ``TypeError``. The DELETE still runs
+    SQL-side where the comparison is unambiguous.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(UTC).replace(tzinfo=None)
     stmt = delete(Link).where(
         Link.owner_id == owner_id,
         Link.expires_at.is_not(None),
         Link.expires_at <= now,
     )
-    await db.execute(stmt)
+    await db.execute(stmt, execution_options={"synchronize_session": False})
     await db.commit()
 
 

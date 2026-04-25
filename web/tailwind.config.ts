@@ -101,12 +101,17 @@ const config: Config = {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "caret-blink": {
+          "0%, 49%": { opacity: "1" },
+          "50%, 100%": { opacity: "0" },
+        },
       },
       animation: {
         "gradient-shift": "gradient-shift 8s ease infinite",
         "float-slow": "float-slow 9s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2.5s ease-in-out infinite",
         shimmer: "shimmer 1.6s ease-in-out infinite",
+        "caret-blink": "caret-blink 1.05s steps(1) infinite",
       },
     },
   },

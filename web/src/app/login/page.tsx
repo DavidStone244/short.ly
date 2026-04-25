@@ -3,13 +3,14 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Mail, Lock as LockIcon } from "lucide-react";
+import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { AuthShell, SocialButtons, Divider } from "@/components/AuthShell";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -35,40 +36,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-md">
-      <Card>
-        <CardHeader>
-          <CardTitle>Log in</CardTitle>
-          <CardDescription>Access your dashboard and stats.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" disabled={submitting} className="w-full">
-              {submitting ? "Logging in..." : "Log in"}
-            </Button>
-            <p className="text-sm text-muted-foreground text-center">
-              No account?{" "}
-              <Link href="/register" className="underline text-foreground">
-                Sign up
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to access your dashboard and link analytics."
+      footer={
+        <>
+          No account?{" "}
+          <Link href="/register" className="text-foreground underline-offset-2 hover:underline">
+            Create one
+          </Link>
+        </>
+      }
+    >
+      <SocialButtons />
+      <Divider>or continue with email</Divider>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <div className="relative">
+            <LockIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={submitting}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60"
+        >
+          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {submitting ? "Signing in" : "Sign in"}
+        </motion.button>
+      </form>
+    </AuthShell>
   );
 }

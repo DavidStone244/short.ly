@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
 
     database_url: str = "postgresql+asyncpg://shortly:shortly@localhost:5432/shortly"
-    redis_url: str | None = "redis://localhost:6379/0"
+    redis_url: str | None = None
 
     rate_limit_per_minute: int = 60
     rate_limit_shorten_per_minute: int = 20

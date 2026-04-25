@@ -46,7 +46,7 @@ jobs:
       - name: Run pytest
         env:
           ENVIRONMENT: test
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           REDIS_URL: ""
           SECRET_KEY: test-secret-key
         run: pytest --cov=shortly --cov-report=term-missing

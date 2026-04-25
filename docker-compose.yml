@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: shortly
+      POSTGRES_PASSWORD: shortly
+      POSTGRES_DB: shortly
+    ports:
+      - "5432:5432"
+    volumes:
+      - shortly_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shortly"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://shortly:shortly@db:5432/shortly
+      REDIS_URL: redis://redis:6379/0
+      APP_BASE_URL: http://localhost:8000
+      SECRET_KEY: change-me-locally-please
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn shortly.main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+
+volumes:
+  shortly_pgdata:

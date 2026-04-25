@@ -50,3 +50,25 @@ jobs:
           REDIS_URL: ""
           SECRET_KEY: test-secret-key
         run: pytest --cov=shortly --cov-report=term-missing
+
+  web:
+    name: Web (lint, typecheck, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build

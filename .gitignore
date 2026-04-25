@@ -39,3 +39,14 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 logs/
+
+# Frontend (Next.js)
+web/node_modules/
+web/.next/
+web/out/
+web/build/
+web/.env.local
+web/.env.development.local
+web/.env.production.local
+web/next-env.d.ts
+web/.vercel

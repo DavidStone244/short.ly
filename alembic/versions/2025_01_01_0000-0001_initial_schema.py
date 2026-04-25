@@ -44,7 +44,12 @@ def upgrade() -> None:
 
     op.create_table(
         "links",
-        sa.Column("id", sa.BigInteger(), primary_key=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("code", sa.String(length=64), nullable=False),
         sa.Column("target_url", sa.String(length=2048), nullable=False),
         sa.Column("is_custom", sa.Boolean(), nullable=False, server_default=sa.false()),
@@ -74,8 +79,17 @@ def upgrade() -> None:
 
     op.create_table(
         "clicks",
-        sa.Column("id", sa.BigInteger(), primary_key=True),
-        sa.Column("link_id", sa.BigInteger(), nullable=False),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
+        sa.Column(
+            "link_id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            nullable=False,
+        ),
         sa.Column(
             "occurred_at",
             sa.DateTime(timezone=True),

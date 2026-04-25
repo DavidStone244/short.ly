@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,11 +24,11 @@ import {
 } from "recharts";
 
 interface PageProps {
-  params: Promise<{ code: string }>;
+  params: { code: string };
 }
 
 export default function LinkDetailPage({ params }: PageProps) {
-  const { code } = use(params);
+  const { code } = params;
   const { token, ready } = useAuth();
   const router = useRouter();
   const [link, setLink] = useState<LinkOut | null>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Lock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,11 @@ import { api, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 
 interface PageProps {
-  params: Promise<{ code: string }>;
+  params: { code: string };
 }
 
 export default function UnlockPage({ params }: PageProps) {
-  const { code } = use(params);
+  const { code } = params;
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 

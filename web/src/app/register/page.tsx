@@ -10,7 +10,55 @@ import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { AuthShell, SocialButtons, Divider } from "@/components/AuthShell";
+import { AuthShell } from "@/components/AuthShell";
+
+type StrengthTier = "poor" | "good" | "excellent";
+
+interface StrengthInfo {
+  tier: StrengthTier;
+  label: string;
+  hint: string;
+  /** 0..3 — number of bars to fill */
+  fill: number;
+}
+
+function passwordStrength(p: string): StrengthInfo {
+  const long = p.length >= 16;
+  const medium = p.length >= 8;
+  const hasUpper = /[A-Z]/.test(p);
+  const hasNumber = /\d/.test(p);
+  const hasSpecial = /[^A-Za-z0-9]/.test(p);
+
+  if (long && hasUpper && hasNumber && hasSpecial) {
+    return {
+      tier: "excellent",
+      label: "Excellent",
+      hint: "Looks great. Strong enough for sensitive accounts.",
+      fill: 3,
+    };
+  }
+  if (medium && hasUpper && hasNumber) {
+    return {
+      tier: "good",
+      label: "Good",
+      hint: "Acceptable. Add a special character + 16 chars to reach Excellent.",
+      fill: 2,
+    };
+  }
+  const missing: string[] = [];
+  if (p.length < 8) missing.push("8+ characters");
+  if (!hasUpper) missing.push("an uppercase letter");
+  if (!hasNumber) missing.push("a number");
+  return {
+    tier: "poor",
+    label: "Poor",
+    hint:
+      missing.length > 0
+        ? `Add ${missing.join(", ")}.`
+        : "Add an uppercase letter and a number.",
+    fill: p.length === 0 ? 0 : 1,
+  };
+}
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -20,11 +68,12 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const strength = passwordStrength(password);
+  const acceptable = strength.tier !== "poor";
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+    if (!acceptable) {
+      toast.error("Password isn't strong enough yet — " + strength.hint);
       return;
     }
     setSubmitting(true);
@@ -42,6 +91,17 @@ export default function RegisterPage() {
     }
   };
 
+  const tierColor: Record<StrengthTier, string> = {
+    poor: "bg-red-500",
+    good: "bg-amber-400",
+    excellent: "bg-emerald-400",
+  };
+  const tierLabelColor: Record<StrengthTier, string> = {
+    poor: "text-red-300",
+    good: "text-amber-300",
+    excellent: "text-emerald-300",
+  };
+
   return (
     <AuthShell
       title="Create your account"
@@ -55,8 +115,6 @@ export default function RegisterPage() {
         </>
       }
     >
-      <SocialButtons />
-      <Divider>or sign up with email</Divider>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
@@ -82,40 +140,36 @@ export default function RegisterPage() {
               id="password"
               type="password"
               required
-              minLength={8}
               autoComplete="new-password"
-              placeholder="At least 8 characters"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-9"
             />
           </div>
-          {/* Strength meter */}
-          <div className="mt-2 grid grid-cols-4 gap-1">
-            {[0, 1, 2, 3].map((i) => (
+          {/* 3-tier strength meter: Poor / Good / Excellent */}
+          <div className="mt-2 grid grid-cols-3 gap-1">
+            {[0, 1, 2].map((i) => (
               <span
                 key={i}
                 className={`h-1 rounded-full transition-colors ${
-                  i < strength.score
-                    ? strength.score <= 1
-                      ? "bg-red-500/70"
-                      : strength.score === 2
-                      ? "bg-amber-400/80"
-                      : strength.score === 3
-                      ? "bg-emerald-400/80"
-                      : "bg-emerald-400"
-                    : "bg-border"
+                  i < strength.fill ? tierColor[strength.tier] : "bg-border"
                 }`}
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">{strength.label}</p>
+          <div className="mt-1 flex items-center justify-between text-xs">
+            <span className={`font-medium ${tierLabelColor[strength.tier]}`}>
+              {password ? strength.label : "Password strength"}
+            </span>
+            <span className="text-muted-foreground">{strength.hint}</span>
+          </div>
         </div>
         <motion.button
           whileTap={{ scale: 0.98 }}
           type="submit"
-          disabled={submitting}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-60"
+          disabled={submitting || !acceptable}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient bg-[length:200%_200%] text-sm font-medium text-white shadow-glow-sm transition-all hover:bg-[position:100%_50%] hover:shadow-glow disabled:opacity-50"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {submitting ? "Creating account" : "Create account"}
@@ -123,15 +177,4 @@ export default function RegisterPage() {
       </form>
     </AuthShell>
   );
-}
-
-function passwordStrength(p: string): { score: number; label: string } {
-  if (!p) return { score: 0, label: "Use 8+ characters with a mix of letters and numbers." };
-  let score = 0;
-  if (p.length >= 8) score += 1;
-  if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score += 1;
-  if (/\d/.test(p)) score += 1;
-  if (/[^A-Za-z0-9]/.test(p)) score += 1;
-  const labels = ["Too short", "Weak", "Okay", "Strong", "Excellent"];
-  return { score, label: labels[score] };
 }

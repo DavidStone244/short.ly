@@ -28,34 +28,29 @@ function passwordStrength(p: string): StrengthInfo {
   const hasUpper = /[A-Z]/.test(p);
   const hasNumber = /\d/.test(p);
   const hasSpecial = /[^A-Za-z0-9]/.test(p);
+  const charBucketsOk = hasUpper && hasNumber && hasSpecial;
 
-  if (long && hasUpper && hasNumber && hasSpecial) {
-    return {
-      tier: "excellent",
-      label: "Excellent",
-      hint: "",
-      fill: 3,
-    };
+  if (long && charBucketsOk) {
+    return { tier: "excellent", label: "Excellent", hint: "", fill: 3 };
   }
-  if (medium && hasUpper && hasNumber) {
-    return {
-      tier: "good",
-      label: "Good",
-      hint: "",
-      fill: 2,
-    };
+  if (medium && charBucketsOk) {
+    return { tier: "good", label: "Good", hint: "", fill: 2 };
   }
+
+  // Priority order: special, uppercase, number — show those *first*. Only
+  // once all three character-class buckets are satisfied does the 8+ chars
+  // requirement surface (since otherwise it dominates while the rest are
+  // also missing).
   const missing: string[] = [];
-  if (p.length < 8) missing.push("8+ characters");
+  if (!hasSpecial) missing.push("a special character");
   if (!hasUpper) missing.push("an uppercase letter");
   if (!hasNumber) missing.push("a number");
+  if (charBucketsOk && !medium) missing.push("8+ characters");
+
   return {
     tier: "poor",
     label: "Poor",
-    hint:
-      missing.length > 0
-        ? `Add ${missing.join(", ")}.`
-        : "Add an uppercase letter and a number.",
+    hint: missing.length > 0 ? `Add ${missing.join(", ")}.` : "",
     fill: p.length === 0 ? 0 : 1,
   };
 }

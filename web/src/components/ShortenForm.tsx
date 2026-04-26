@@ -12,9 +12,15 @@ import { toast } from "sonner";
 
 interface ShortenFormProps {
   size?: "default" | "hero";
+  /**
+   * Called after a successful create. Lets parents (e.g. the dashboard "New
+   * link" modal) close themselves and prepend the new link to their list
+   * without forcing the user to refresh.
+   */
+  onCreated?: (link: LinkOut) => void;
 }
 
-export function ShortenForm({ size = "default" }: ShortenFormProps = {}) {
+export function ShortenForm({ size = "default", onCreated }: ShortenFormProps = {}) {
   const { token } = useAuth();
   const isHero = size === "hero";
   const [targetUrl, setTargetUrl] = useState("");
@@ -48,6 +54,7 @@ export function ShortenForm({ size = "default" }: ShortenFormProps = {}) {
       setPassword("");
       setExpiresAt("");
       toast.success("Short link created");
+      onCreated?.(link);
     } catch (err) {
       const msg = err instanceof ApiError ? err.detail : "Failed to create link";
       toast.error(msg);

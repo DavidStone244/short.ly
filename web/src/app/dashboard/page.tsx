@@ -235,7 +235,23 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="mt-4">
-                <ShortenForm />
+                <ShortenForm
+                  onCreated={(link) => {
+                    setLinks((prev) => (prev ? [link, ...prev] : [link]));
+                    // Close after a beat so the user sees the success state.
+                    setTimeout(() => setShowNew(false), 600);
+                    // Pull stats for the new link in the background so its
+                    // sparkline + click count populate without a full refresh.
+                    if (token) {
+                      api
+                        .getStats(link.code, token)
+                        .then((s) =>
+                          setStats((prev) => ({ ...prev, [link.code]: s })),
+                        )
+                        .catch(() => {});
+                    }
+                  }}
+                />
               </div>
             </motion.div>
           </motion.div>

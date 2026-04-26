@@ -9,7 +9,6 @@ import {
   Timer,
   Zap,
   Globe,
-  ShieldCheck,
   Sparkles,
   ChevronRight,
 } from "lucide-react";
@@ -29,7 +28,7 @@ export default function HomePage() {
         <Particles />
         <CursorSpotlight />
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-32 pt-24 sm:pt-32">
+        <div className="relative mx-auto max-w-6xl px-5 pb-32 pt-12 sm:pt-20">
           <TypewriterHeadline
             lines={[
               { prefix: "Shorten ", highlight: "smarter", suffix: "." },
@@ -179,22 +178,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border/60 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-xs text-muted-foreground sm:flex-row">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>short.ly · open source URL shortener</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="https://github.com/DavidStone244/short.ly" className="hover:text-foreground transition-colors">
-              GitHub
-            </a>
-            <a href="/login" className="hover:text-foreground transition-colors">Sign in</a>
-            <a href="/register" className="hover:text-foreground transition-colors">Get started</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

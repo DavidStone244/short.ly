@@ -17,8 +17,11 @@ import { Particles } from "@/components/Particles";
 import { CursorSpotlight } from "@/components/CursorSpotlight";
 import { MeshBackground } from "@/components/MeshBackground";
 import { TypewriterHeadline } from "@/components/TypewriterHeadline";
+import { useAuth } from "@/lib/auth";
 
 export default function HomePage() {
+  const { token } = useAuth();
+  const isAuthed = Boolean(token);
   return (
     <div className="relative">
       {/* HERO */}
@@ -138,7 +141,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — only for signed-out visitors */}
+      {!isAuthed && (
       <section className="relative mx-auto max-w-5xl px-5 py-24">
         <div className="border-gradient relative overflow-hidden rounded-3xl bg-card/40 p-10 backdrop-blur-xl sm:p-14">
           <div
@@ -177,6 +181,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
     </div>
   );

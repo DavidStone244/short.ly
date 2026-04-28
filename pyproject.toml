@@ -14,7 +14,6 @@ dependencies = [
     "alembic>=1.14.0",
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
-    "passlib>=1.7.4",
     "bcrypt>=4.0,<5.0",
     "python-jose[cryptography]>=3.3.0",
     "redis>=5.2.0",
@@ -33,7 +32,6 @@ dev = [
     "aiosqlite>=0.20.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
-    "types-passlib>=1.7.7",
     "types-python-jose>=3.3.4",
 ]
 
@@ -49,7 +47,6 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 filterwarnings = [
-    "ignore::DeprecationWarning:passlib.*",
     "ignore::DeprecationWarning:jose.*",
 ]
 
@@ -73,5 +70,5 @@ plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions/"]
 
 [[tool.mypy.overrides]]
-module = ["jose.*", "passlib.*", "user_agents.*", "qrcode.*"]
+module = ["jose.*", "user_agents.*", "qrcode.*"]
 ignore_missing_imports = true

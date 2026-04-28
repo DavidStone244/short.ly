@@ -54,6 +54,10 @@ export default function RootLayout({
               richColors
               closeButton
               theme="dark"
+              position="bottom-right"
+              expand
+              visibleToasts={3}
+              gap={10}
               toastOptions={{
                 className: "glass-strong",
               }}
